@@ -27,4 +27,5 @@ jobs:
         with:
           path: dist
       - id: deployment
+
         uses: actions/deploy-pages@v4
