@@ -29,23 +29,25 @@ function render() {
   if (elements.list) {
     elements.list.innerHTML = '';
     notes.forEach((note) => {
-      const item = document.createElement('button');
-      item.type = 'button';
-      item.className = 'note-item';
-      item.setAttribute('aria-pressed', String(note.id === state.selectedId));
-      item.innerHTML = `
+      const listItem = document.createElement('li');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'note-item';
+      button.setAttribute('aria-pressed', String(note.id === state.selectedId));
+      button.innerHTML = `
         <span class="note-title"></span>
         <span class="note-body"></span>
       `;
-      item.querySelector('.note-title').textContent = note.title || '(Tanpa judul)';
-      item.querySelector('.note-body').textContent = note.body || '';
-      item.addEventListener('click', () => {
+      button.querySelector('.note-title').textContent = note.title || '(Tanpa judul)';
+      button.querySelector('.note-body').textContent = note.body || '';
+      button.addEventListener('click', () => {
         state.selectedId = note.id;
         elements.title.value = note.title;
         elements.body.value = note.body;
         render();
       });
-      elements.list.appendChild(item);
+      listItem.appendChild(button);
+      elements.list.appendChild(listItem);
     });
   }
 

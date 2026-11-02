@@ -6,7 +6,7 @@
   --border: #e5e7eb;
   --primary: #4f46e5;
   --primary-hover: #4338ca;
-  --danger: #dc2626;
+  --danger: #b91c1c;
   --danger-bg: #fee2e2;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   --radius: 10px;
@@ -19,8 +19,8 @@
     --text: #f3f4f6;
     --muted: #9ca3af;
     --border: #2e303a;
-    --primary: #c084fc;
-    --primary-hover: #d8b4fe;
+    --primary: #7c3aed;
+    --primary-hover: #6d28d9;
     --danger: #f87171;
     --danger-bg: #3f1d1d;
   }
@@ -129,6 +129,12 @@ textarea {
   background: var(--surface);
   color: var(--text);
   font: inherit;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
 }
 
 textarea {
