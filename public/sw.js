@@ -1,12 +1,12 @@
 const CACHE_NAME = "notes-app-v1";
 
 const APP_SHELL = [
-  "/",
-  "/index.html",
-  "/manifest.webmanifest",
-  "/favicon.svg",
-  "/icon-192.png",
-  "/icon-512.png",
+  "./",
+  "./index.html",
+  "./manifest.webmanifest",
+  "./favicon.svg",
+  "./icon-192.png",
+  "./icon-512.png",
 ];
 
 self.addEventListener("install", (event) => {
@@ -45,6 +45,6 @@ self.addEventListener("fetch", (event) => {
         }
         return response;
       });
-    }).catch(() => caches.match("/index.html")),
+    }).catch(() => caches.match("./index.html").then((fallback) => fallback || caches.match("/index.html"))),
   );
 });
