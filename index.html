@@ -1,13 +1,53 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>notes-app</title>
+    <meta name="theme-color" content="#4f46e5" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>Catatan</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <header class="app-header">
+        <h1>Catatan</h1>
+        <button id="add" type="button" class="primary">Tambah catatan</button>
+      </header>
+
+      <div class="search">
+        <label for="search">Cari</label>
+        <input id="search" name="search" type="search" placeholder="Cari catatan..." />
+      </div>
+
+      <main class="content">
+        <section class="editor" aria-label="Editor catatan">
+          <h2>Editor</h2>
+          <form id="note-form">
+            <div class="field">
+              <label for="title">Judul</label>
+              <input id="title" name="title" type="text" placeholder="Judul catatan" />
+            </div>
+            <div class="field">
+              <label for="body">Isi</label>
+              <textarea id="body" name="body" rows="5" placeholder="Isi catatan"></textarea>
+            </div>
+            <div class="actions">
+              <button id="save" type="submit" class="primary">Simpan</button>
+              <button id="delete" type="button" class="danger">Hapus</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="list-section" aria-label="Daftar catatan">
+          <h2>Daftar catatan</h2>
+          <p id="empty-state">Belum ada catatan.</p>
+          <ul id="note-list" class="note-list"></ul>
+        </section>
+      </main>
+
+      <div id="toast" role="status" aria-live="polite"></div>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

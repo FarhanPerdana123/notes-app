@@ -12,3 +12,6 @@
 ## Gaya kode
 - JavaScript modern (ES modules), tanpa framework.
 - Nama fungsi dan variabel dalam English.
+## Pelajaran dari work order sebelumnya 
+- Cek setiap layar di lebar 360 px sebelum selesai. 
+- Semua tombol harus punya teks atau aria-label (accessibility).

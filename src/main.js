@@ -1,60 +1,149 @@
-import './style.css'
-import heroImg from './assets/hero.png'
-import javascriptLogo from './assets/javascript.svg'
-import viteLogo from './assets/vite.svg'
-import { setupCounter } from './counter.js'
+import './style.css';
+import { createStore } from './storage.js';
 
-document.querySelector('#app').innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${javascriptLogo}" class="framework" alt="JavaScript logo"/>
-    <img src="${viteLogo}" class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.js</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+const store = createStore();
 
-<div class="ticks"></div>
+const app = document.querySelector('#app');
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src="${viteLogo}" alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-          <img class="button-icon" src="${javascriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+// State sederhana untuk catatan yang sedang diedit/dipilih.
+const state = {
+  query: '',
+  selectedId: null,
+};
 
-<div class="ticks"></div>
-<section id="spacer"></section>
-`
+const elements = {
+  app,
+  list: document.querySelector('#note-list'),
+  empty: document.querySelector('#empty-state'),
+  search: document.querySelector('#search'),
+  form: document.querySelector('#note-form'),
+  title: document.querySelector('#title'),
+  body: document.querySelector('#body'),
+  add: document.querySelector('#add'),
+  delete: document.querySelector('#delete'),
+};
 
-setupCounter(document.querySelector('#counter'))
+function render() {
+  const notes = store.search(state.query);
+
+  if (elements.list) {
+    elements.list.innerHTML = '';
+    notes.forEach((note) => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'note-item';
+      item.setAttribute('aria-pressed', String(note.id === state.selectedId));
+      item.innerHTML = `
+        <span class="note-title"></span>
+        <span class="note-body"></span>
+      `;
+      item.querySelector('.note-title').textContent = note.title || '(Tanpa judul)';
+      item.querySelector('.note-body').textContent = note.body || '';
+      item.addEventListener('click', () => {
+        state.selectedId = note.id;
+        elements.title.value = note.title;
+        elements.body.value = note.body;
+        render();
+      });
+      elements.list.appendChild(item);
+    });
+  }
+
+  if (elements.empty) {
+    elements.empty.hidden = notes.length !== 0;
+  }
+}
+
+function showToast(message) {
+  const toast = document.querySelector('#toast');
+  toast.textContent = message;
+  toast.classList.add('is-visible');
+  window.clearTimeout(showToast.timeout);
+  showToast.timeout = window.setTimeout(() => {
+    toast.classList.remove('is-visible');
+  }, 2000);
+}
+
+function submitNote(event) {
+  event.preventDefault();
+  const title = elements.title.value.trim();
+  const body = elements.body.value.trim();
+
+  if (!title && !body) {
+    showToast('Judul atau isi belum diisi');
+    return;
+  }
+
+  const existing = state.selectedId
+    ? store.list().find((note) => note.id === state.selectedId)
+    : null;
+  store.save({ id: existing?.id, title, body });
+  state.selectedId = null;
+  elements.title.value = '';
+  elements.body.value = '';
+  elements.title.focus();
+  render();
+}
+
+function removeSelected() {
+  if (!state.selectedId) return;
+  store.remove(state.selectedId);
+  state.selectedId = null;
+  elements.title.value = '';
+  elements.body.value = '';
+  elements.title.focus();
+  render();
+}
+
+function startNewNote() {
+  state.selectedId = null;
+  elements.title.value = '';
+  elements.body.value = '';
+  elements.title.focus();
+}
+
+function searchNotes() {
+  state.query = elements.search.value;
+  render();
+}
+
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // SW gagal didaftarkan (mis. saat mode preview/CI); aplikasi tetap jalan.
+    });
+  });
+}
+
+// Cadangkan aset halaman saat ini ke Cache Storage agar tetap tersedia saat
+// reload offline. Berjalan di klien karena first load belum dikontrol SW,
+// sehingga aset ber-hash tidak sempat ter-cache oleh SW.
+async function cacheCurrentPageAssets() {
+  if (!('caches' in window)) return;
+  try {
+    const cache = await caches.open('notes-app-v1');
+    const urls = ['/', '/index.html', '/manifest.webmanifest'];
+    performance
+      .getEntriesByType('resource')
+      .map((entry) => entry.name)
+      .forEach((url) => urls.push(url));
+    await Promise.all(
+      [...new Set(urls)].map((url) => cache.add(url).catch(() => {})),
+    );
+  } catch {
+    // Kegagalan precache tidak menghentikan aplikasi.
+  }
+}
+
+function init() {
+  elements.add.addEventListener('click', startNewNote);
+  elements.delete.addEventListener('click', removeSelected);
+  elements.search.addEventListener('input', searchNotes);
+  elements.form.addEventListener('submit', submitNote);
+  registerServiceWorker();
+  cacheCurrentPageAssets();
+  render();
+}
+
+init();
