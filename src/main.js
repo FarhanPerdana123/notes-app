@@ -112,7 +112,7 @@ function searchNotes() {
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {
       // SW gagal didaftarkan (mis. saat mode preview/CI); aplikasi tetap jalan.
     });
   });
@@ -125,7 +125,7 @@ async function cacheCurrentPageAssets() {
   if (!('caches' in window)) return;
   try {
     const cache = await caches.open('notes-app-v1');
-    const urls = ['/', '/index.html', '/manifest.webmanifest'];
+    const urls = ['./', './index.html', './manifest.webmanifest'];
     performance
       .getEntriesByType('resource')
       .map((entry) => entry.name)

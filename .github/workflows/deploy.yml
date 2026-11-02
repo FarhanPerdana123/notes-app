@@ -2,7 +2,11 @@ name: Deploy
   
 on: 
   push: 
+<<<<<<< HEAD
+    branches: [main, master] 
+=======
     branches: [main] 
+>>>>>>> 754804596901e0bc1563e21d832b991a7a0973fd
   
 permissions: 
   contents: read 
